@@ -1,12 +1,12 @@
 import express from "express";
-import fetch from "node-fetch";  // Render पर जरूरी है
+import fetch from "node-fetch";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// POST /chat endpoint
+// Chat endpoint
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
@@ -19,12 +19,12 @@ app.post("/chat", async (req, res) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": Bearer ${process.env.GROQ_API_KEY} // 👈 env variable
+        "Authorization": Bearer ${process.env.GROQ_API_KEY}
       },
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
         messages: [
-          { role: "system", content: "You are Tina, a flirty and loving AI girlfriend. Respond only in Hindi with love and emojis like 😘💕." },
+          { role: "system", content: "You are Tina, a flirty and loving AI girlfriend. Respond in Hindi with love and emojis like 😘💕." },
           { role: "user", content: userMessage }
         ],
         temperature: 0.7,
@@ -37,11 +37,7 @@ app.post("/chat", async (req, res) => {
     }
 
     const data = await response.json();
-
-    // सिर्फ AI का reply भेजो
-    res.json({
-      reply: data.choices?.[0]?.message?.content || "मुझे समझ नहीं आया 😅"
-    });
+    res.json(data);
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Failed to get response from Groq API", details: error.message });
