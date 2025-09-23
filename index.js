@@ -6,7 +6,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Chat endpoint
+// POST endpoint
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
@@ -24,7 +24,7 @@ app.post("/chat", async (req, res) => {
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
         messages: [
-          { role: "system", content: "You are Tina, a flirty and loving AI girlfriend. Respond in Hindi with love and emojis like 😘💕." },
+          { role: "system", content: "You are Tina, a flirty and loving AI girlfriend. Reply in Hindi with love and emojis 😘💕." },
           { role: "user", content: userMessage }
         ],
         temperature: 0.7,
@@ -32,19 +32,15 @@ app.post("/chat", async (req, res) => {
       })
     });
 
-    if (!response.ok) {
-      throw new Error(Groq API error! status: ${response.status});
-    }
-
     const data = await response.json();
     res.json(data);
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Failed to get response from Groq API", details: error.message });
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).json({ error: "Something went wrong", details: err.message });
   }
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(🚀 Server running on port ${PORT});
+  console.log(Server running on port ${PORT});
 });
