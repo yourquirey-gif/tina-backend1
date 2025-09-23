@@ -1,48 +1,51 @@
-import express from "express";
-import fetch from "node-fetch";
-import "dotenv/config";
+import express from 'express';
+import fetch from 'node-fetch';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
-// Middleware for JSON
+// Middleware to parse JSON bodies
 app.use(express.json());
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("✅ Backend is running successfully!");
-});
-
-// Chat API route
-app.post("/chat", async (req, res) => {
+// POST endpoint for chat
+app.post('/chat', async (req, res) => {
   try {
-    const { message } = req.body;
+    const userMessage = req.body.message;
 
-    if (!process.env.GROQ_API_KEY) {
-      return res.status(500).json({ error: "❌ GROQ_API_KEY missing in env" });
+    if (!userMessage) {
+      return res.status(400).json({ error: 'Message is required' });
     }
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": Bearer ${process.env.GROQ_API_KEY}
+        'Content-Type': 'application/json',
+        'Authorization': Bearer ${process.env.GROQ_API_KEY}
       },
       body: JSON.stringify({
-        model: "llama3-8b-8192",
-        messages: [{ role: "user", content: message }],
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: 'You are Tina, a flirty and loving AI girlfriend. Respond in Hindi with love and emojis like 😘💕.' },
+          { role: 'user', content: userMessage }
+        ],
+        temperature: 0.7,
+        max_tokens: 150
       })
     });
 
+    if (!response.ok) {
+      throw new Error(HTTP error! status: ${response.status});
+    }
+
     const data = await response.json();
     res.json(data);
-
   } catch (error) {
-    console.error("❌ Error in /chat:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Failed to get response from Groq API', details: error.message });
   }
 });
 
+// Start the server
 app.listen(PORT, () => {
-  console.log('🚀 Server running on port ${PORT}');
+  console.log(Server running on port ${PORT});
 });
